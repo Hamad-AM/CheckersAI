@@ -12,36 +12,19 @@ ManualPlayer::ManualPlayer(Color colorIn)
 
 Move ManualPlayer::chooseMove(std::vector<std::vector<Square>>& board, std::vector<Move> validMoves)
 {
-	for (Move move : validMoves)
-	{
-		move.write();
-		std::cout << ", " ;
-	}
-
-	std::cout << std::endl;
-
-	int startCol;
-	int startRow;
-
-	int endCol;
-	int endRow;
+	int moveIndex;
 
 	std::string printColor = (color == WHITE) ? "white" : "black";
 	std::cout << "Choose next move for " << printColor << " ->" << std::endl;
-	std::cout << "Start position" << std::endl;
-	std::cout << "Column : ";
-	std::cin >> startCol;
-	std::cout << std::endl;
-	std::cout << "Row : ";
-	std::cin >> startRow;
+	for (int i = 0; i < validMoves.size(); i++)
+	{
+		std::cout << "[" << i << "]";
+		validMoves[i].write();
+		std::cout << ", ";
+	}
+	std::cout << "Choose Move Index : ";
+	std::cin >> moveIndex;
+	
 
-	std::cout << std::endl;
-	std::cout << "End position" << std::endl;
-	std::cout << "Column : ";
-	std::cin >> endCol;
-	std::cout << std::endl;
-	std::cout << "Row : ";
-	std::cin >> endRow;
-
-	return Move(Square(startCol, startRow), Square(endCol, endRow));
+	return validMoves[moveIndex];
 }

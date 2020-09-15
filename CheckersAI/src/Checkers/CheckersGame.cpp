@@ -6,6 +6,7 @@
 #include "Move.h"
 #include "Square.h"
 
+
 CheckersGame::CheckersGame(Color manualPlayersColor)
 	:board(8, std::vector<Square>(8, Square(0, 0)))
 {
@@ -25,6 +26,7 @@ CheckersGame::CheckersGame(Color manualPlayersColor)
 
 	turn = BLACK;
 }
+
 
 void CheckersGame::initialize()
 {
@@ -55,7 +57,6 @@ void CheckersGame::initialize()
 		}
 	}
 }
-
 
 
 void CheckersGame::play()
@@ -94,17 +95,75 @@ void CheckersGame::play()
 	}
 }
 
+
 std::vector<Move> CheckersGame::getValidMoves()
 {
 	std::vector<Move> validmoves;
+	std::vector<Move> validJumps;
 	Player& currentPlayer = (turn == WHITE) ? *whitePlayer : *blackPlayer;
 	
 	for (int i = 0; i < currentPlayer.getNumOfPieces(); i++)
 	{
 		getNormalMoves(currentPlayer.getPiece(i).lock(), validmoves);
+		getJumpMoves(currentPlayer.getPiece(i).lock(), validJumps);
 	}
 
 	return validmoves;
+}
+
+
+void CheckersGame::getJumpMoves(std::shared_ptr<Piece> const piece, std::vector<Move>& moves)
+{
+	Square pieceSquare = getSquareOfPiece(piece);
+	std::vector<Square> squares;
+
+	std::vector<Square> possiblePoints;
+	getMultiJumpMoves(possiblePoints, pieceSquare, board, false);
+	moves.emplace_back();
+}
+
+
+void CheckersGame::getMultiJumpMoves(std::vector<Square>& movesSoFar, Square start, Board& board, bool isKing)
+{
+	if (turn == BLACK || isKing == true)
+	{
+		std::vector<Square> squares = getJumpSquaresDown(start, board);
+		if (squares.empty())
+		{
+			return;
+		}
+		else
+		{
+			for (Square newSquare : squares)
+			{
+				Board newBoard = completeMove(start, newSquare, board);
+				movesSoFar.emplace_back(newSquare);
+				getMultiJumpMoves(movesSoFar, newSquare, newBoard, isKing);
+			}
+		}
+	}
+	if (turn == WHITE || isKing == true)
+	{
+		std::vector<Square> squares = getJumpSquaresDown(start, board);
+		if (squares.empty())
+		{
+			return;
+		}
+		else
+		{
+			for (Square newSquare : squares)
+			{
+				Board newBoard = completeMove(start, newSquare, board);
+				movesSoFar.emplace_back(newSquare);
+				getMultiJumpMoves(movesSoFar, newSquare, newBoard, isKing);
+			}
+		}
+	}
+}
+
+Board CheckersGame::completeMove(Square start, Square end, Board& board)
+{
+
 }
 
 void CheckersGame::getNormalMoves(std::shared_ptr<Piece> const piece, std::vector<Move>& moves)
@@ -118,7 +177,7 @@ void CheckersGame::getNormalMoves(std::shared_ptr<Piece> const piece, std::vecto
 			squares.push_back(square);
 		}
 	}
-	else if (turn == WHITE || piece->king == true)
+	if (turn == WHITE || piece->king == true)
 	{
 		for (Square square : getDiagonalSquaresUp(pieceSquare))
 		{
@@ -134,6 +193,7 @@ void CheckersGame::getNormalMoves(std::shared_ptr<Piece> const piece, std::vecto
 		}
 	}
 }
+
 
 Square CheckersGame::getSquareOfPiece(std::shared_ptr<Piece> const piece)
 {
@@ -152,29 +212,6 @@ Square CheckersGame::getSquareOfPiece(std::shared_ptr<Piece> const piece)
 	}
 }
 
-std::vector<Square> CheckersGame::getDiagonalSquaresUp(Square& const relativeSquare)
-{
-	std::vector<Square> squares;
-	squares.reserve(2);
-
-	if (relativeSquare.col != 0)
-	{
-		if (relativeSquare.row != 0)
-		{
-			squares.emplace_back(getTopLeft(relativeSquare));
-		}
-	}
-
-	if (relativeSquare.col != 7)
-	{
-		if (relativeSquare.row != 0)
-		{
-			squares.emplace_back(getTopRight(relativeSquare));
-		}
-	}
-
-	return squares;
-}
 
 std::vector<Square> CheckersGame::getDiagonalSquaresDown(Square& const relativeSquare)
 {
@@ -200,6 +237,109 @@ std::vector<Square> CheckersGame::getDiagonalSquaresDown(Square& const relativeS
 
 	return squares;
 }
+
+
+std::vector<Square> CheckersGame::getDiagonalSquaresUp(Square& const relativeSquare)
+{
+	std::vector<Square> squares;
+	squares.reserve(2);
+
+	if (relativeSquare.col != 0)
+	{
+		if (relativeSquare.row != 0)
+		{
+			squares.emplace_back(getTopLeft(relativeSquare));
+		}
+	}
+
+	if (relativeSquare.col != 7)
+	{
+		if (relativeSquare.row != 0)
+		{
+			squares.emplace_back(getTopRight(relativeSquare));
+		}
+	}
+
+	return squares;
+}
+
+
+std::vector<Square> CheckersGame::getJumpSquaresDown(Square& const square, Board& board)
+{
+	std::vector<Square> returnSqr;
+	returnSqr.reserve(4);
+
+	if (square.col >= 1)
+	{
+		if (square.row <= 6)
+		{
+			// Check bottom left squares
+			if (board[square.col - 1][square.row + 1].occupent != nullptr)
+			{
+				if (board[square.col - 2][square.row + 2].occupent == nullptr)
+				{
+					returnSqr.emplace_back(board[square.col - 2][square.row + 2]);
+				}
+			}
+		}
+	}
+
+	if (square.col <= 6)
+	{
+		if (square.row <= 6)
+		{
+			// Check bottom right squares
+			if (board[square.col + 1][square.row + 1].occupent != nullptr)
+			{
+				if (board[square.col + 2][square.row + 2].occupent == nullptr)
+				{
+					returnSqr.emplace_back(board[square.col + 2][square.row + 2]);
+				}
+			}
+		}
+	}
+
+	return returnSqr;
+}
+
+
+std::vector<Square> CheckersGame::getJumpSquaresUp(Square& const square, Board& board)
+{
+	std::vector<Square> returnSqr;
+	returnSqr.reserve(4);
+
+	if (square.col >= 1)
+	{
+		if (square.row >= 1)
+		{
+			// Check top left squares
+			if (board[square.col - 1][square.row - 1].occupent != nullptr)
+			{
+				if (board[square.col - 2][square.row - 2].occupent == nullptr)
+				{
+					returnSqr.emplace_back(board[square.col + 2][square.row + 2]);
+				}
+			}
+		}
+	}
+
+	if (square.col <= 6)
+	{
+		if (square.row >= 1)
+		{
+			// Check the top right squares
+			if (board[square.col + 1][square.row - 1].occupent != nullptr)
+			{
+				if (board[square.col - 2][square.row - 2].occupent == nullptr)
+				{
+					returnSqr.emplace_back(board[square.col + 2][square.row + 2]);
+				}
+			}
+		}
+	}
+	return returnSqr;
+}
+
 
 Square CheckersGame::getTopLeft(Square& const relativeSquare)
 {
@@ -239,11 +379,13 @@ void CheckersGame::checkIfGameOver(bool& gameOver)
 	}
 }
 
+
 void CheckersGame::executeMove(Move& const move)
 {
 	board[move.to.col][move.to.row].occupent = board[move.from.col][move.from.row].occupent;
 	board[move.from.col][move.to.col].occupent = nullptr;
 }
+
 
 void CheckersGame::printboard()
 {
