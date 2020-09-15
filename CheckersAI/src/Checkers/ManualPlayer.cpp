@@ -17,6 +17,7 @@ Move ManualPlayer::chooseMove(std::vector<std::vector<Square>>& board, std::vect
 		move.write();
 		std::cout << ", " ;
 	}
+
 	std::cout << std::endl;
 
 	int startCol;
