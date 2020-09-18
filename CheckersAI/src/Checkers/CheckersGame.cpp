@@ -104,10 +104,18 @@ std::vector<Move> CheckersGame::getValidMoves()
 	
 	for (int i = 0; i < currentPlayer.getNumOfPieces(); i++)
 	{
-		getNormalMoves(currentPlayer.getPiece(i).lock(), validmoves);
-		getJumpMoves(currentPlayer.getPiece(i).lock(), validJumps);
+		auto piece = currentPlayer.getPiece(i);
+		std::cout << i << std::endl;
+		if (piece != NULL)
+		{
+			getNormalMoves(piece, validmoves);
+			getJumpMoves(piece, validJumps);
+		}
 	}
-
+	if (!validJumps.empty())
+	{  
+		return validJumps;
+	}
 	return validmoves;
 }
 
@@ -119,7 +127,10 @@ void CheckersGame::getJumpMoves(std::shared_ptr<Piece> const piece, std::vector<
 
 	std::vector<Square> possiblePoints;
 	getMultiJumpMoves(possiblePoints, pieceSquare, board, false);
-	moves.emplace_back();
+	for (Square sqr : possiblePoints)
+	{
+		moves.emplace_back(Move(pieceSquare, sqr));
+	}
 }
 
 
@@ -130,6 +141,7 @@ void CheckersGame::getMultiJumpMoves(std::vector<Square>& movesSoFar, Square sta
 		std::vector<Square> squares = getJumpSquaresDown(start, board);
 		if (squares.empty())
 		{
+			movesSoFar.emplace_back(start);
 			return;
 		}
 		else
@@ -137,7 +149,6 @@ void CheckersGame::getMultiJumpMoves(std::vector<Square>& movesSoFar, Square sta
 			for (Square newSquare : squares)
 			{
 				Board newBoard = completeMove(start, newSquare, board);
-				movesSoFar.emplace_back(newSquare);
 				getMultiJumpMoves(movesSoFar, newSquare, newBoard, isKing);
 			}
 		}
@@ -147,6 +158,7 @@ void CheckersGame::getMultiJumpMoves(std::vector<Square>& movesSoFar, Square sta
 		std::vector<Square> squares = getJumpSquaresDown(start, board);
 		if (squares.empty())
 		{
+			movesSoFar.emplace_back(start);
 			return;
 		}
 		else
@@ -154,17 +166,21 @@ void CheckersGame::getMultiJumpMoves(std::vector<Square>& movesSoFar, Square sta
 			for (Square newSquare : squares)
 			{
 				Board newBoard = completeMove(start, newSquare, board);
-				movesSoFar.emplace_back(newSquare);
 				getMultiJumpMoves(movesSoFar, newSquare, newBoard, isKing);
 			}
 		}
 	}
 }
 
+
 Board CheckersGame::completeMove(Square start, Square end, Board& board)
 {
-
+	board[end.col][end.row].occupent = board[start.col][start.row].occupent;
+	board[(end.col - start.col) / 2][(end.row - start.row) / 2].occupent = nullptr;
+	board[start.col][start.row].occupent = nullptr;
+	return board;
 }
+
 
 void CheckersGame::getNormalMoves(std::shared_ptr<Piece> const piece, std::vector<Move>& moves)
 {
@@ -274,7 +290,7 @@ std::vector<Square> CheckersGame::getJumpSquaresDown(Square& const square, Board
 		if (square.row <= 6)
 		{
 			// Check bottom left squares
-			if (board[square.col - 1][square.row + 1].occupent != nullptr)
+			if (board[square.col - 1][square.row + 1].occupent != nullptr && board[square.col - 1][square.row + 1].occupent->color != turn)
 			{
 				if (board[square.col - 2][square.row + 2].occupent == nullptr)
 				{
@@ -289,7 +305,8 @@ std::vector<Square> CheckersGame::getJumpSquaresDown(Square& const square, Board
 		if (square.row <= 6)
 		{
 			// Check bottom right squares
-			if (board[square.col + 1][square.row + 1].occupent != nullptr)
+			if (board[square.col + 1][square.row + 1].occupent != nullptr 
+				&& board[square.col + 1][square.row + 1].occupent->color != turn)
 			{
 				if (board[square.col + 2][square.row + 2].occupent == nullptr)
 				{
@@ -313,7 +330,8 @@ std::vector<Square> CheckersGame::getJumpSquaresUp(Square& const square, Board& 
 		if (square.row >= 1)
 		{
 			// Check top left squares
-			if (board[square.col - 1][square.row - 1].occupent != nullptr)
+			if (board[square.col - 1][square.row - 1].occupent != nullptr 
+				&& board[square.col - 1][square.row - 1].occupent->color != turn)
 			{
 				if (board[square.col - 2][square.row - 2].occupent == nullptr)
 				{
@@ -328,7 +346,8 @@ std::vector<Square> CheckersGame::getJumpSquaresUp(Square& const square, Board& 
 		if (square.row >= 1)
 		{
 			// Check the top right squares
-			if (board[square.col + 1][square.row - 1].occupent != nullptr)
+			if (board[square.col + 1][square.row - 1].occupent != nullptr 
+				&& board[square.col + 1][square.row + 1].occupent->color != turn)
 			{
 				if (board[square.col - 2][square.row - 2].occupent == nullptr)
 				{

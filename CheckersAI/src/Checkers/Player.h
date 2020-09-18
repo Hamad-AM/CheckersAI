@@ -14,7 +14,7 @@ public:
 	Player(Color colorIn);
 
 	void addPiece(std::weak_ptr<Piece> piece);
-	std::weak_ptr<Piece> getPiece(int i) { return pieces[i]; }
+	std::shared_ptr<Piece> getPiece(int i) { return pieces[i].lock(); }
 	bool isEmpty();
 	int getNumOfPieces();
 
