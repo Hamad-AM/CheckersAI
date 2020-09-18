@@ -169,11 +169,14 @@ void CheckersGame::getMultiJumpMoves(std::vector<Square>& movesSoFar, Square sta
 	}
 	if (turn == WHITE || isKing == true)
 	{
-		std::vector<Square> squares = getJumpSquaresDown(start, board);
+		std::vector<Square> squares = getJumpSquaresUp(start, board);
 		if (squares.empty())
 		{
-			movesSoFar.emplace_back(start);
-			return;
+			if (!movesSoFar.empty())
+			{
+				movesSoFar.emplace_back(start);
+				return;
+			}
 		}
 		else
 		{
@@ -299,9 +302,9 @@ std::vector<Square> CheckersGame::getJumpSquaresDown(Square& const square, Board
 	std::vector<Square> returnSqr;
 	returnSqr.reserve(4);
 
-	if (square.col >= 1)
+	if (square.col >= 2)
 	{
-		if (square.row <= 6)
+		if (square.row <= 5)
 		{
 			// Check bottom left squares
 			if (board[square.col - 1][square.row + 1].occupent != nullptr && board[square.col - 1][square.row + 1].occupent->color != turn)
@@ -314,9 +317,9 @@ std::vector<Square> CheckersGame::getJumpSquaresDown(Square& const square, Board
 		}
 	}
 
-	if (square.col <= 6)
+	if (square.col <= 5)
 	{
-		if (square.row <= 6)
+		if (square.row <= 5)
 		{
 			// Check bottom right squares
 			if (board[square.col + 1][square.row + 1].occupent != nullptr 
@@ -339,9 +342,9 @@ std::vector<Square> CheckersGame::getJumpSquaresUp(Square& const square, Board& 
 	std::vector<Square> returnSqr;
 	returnSqr.reserve(4);
 
-	if (square.col >= 1)
+	if (square.col >= 2)
 	{
-		if (square.row >= 1)
+		if (square.row >= 2)
 		{
 			// Check top left squares
 			if (board[square.col - 1][square.row - 1].occupent != nullptr 
@@ -355,15 +358,15 @@ std::vector<Square> CheckersGame::getJumpSquaresUp(Square& const square, Board& 
 		}
 	}
 
-	if (square.col <= 6)
+	if (square.col <= 5)
 	{
-		if (square.row >= 1)
+		if (square.row >= 2)
 		{
 			// Check the top right squares
 			if (board[square.col + 1][square.row - 1].occupent != nullptr 
 				&& board[square.col + 1][square.row + 1].occupent->color != turn)
 			{
-				if (board[square.col - 2][square.row - 2].occupent == nullptr)
+				if (board[square.col + 2][square.row - 2].occupent == nullptr)
 				{
 					returnSqr.emplace_back(board[square.col + 2][square.row + 2]);
 				}
@@ -434,7 +437,7 @@ void CheckersGame::executeMove(Move& const move)
 	{
 		// if not complete normal move
 		board[move.to.col][move.to.row].occupent = board[move.from.col][move.from.row].occupent;
-		board[move.from.col][move.from.col].occupent = nullptr;
+		board[move.from.col][move.from.row].occupent = nullptr;
 	}
 }
 
