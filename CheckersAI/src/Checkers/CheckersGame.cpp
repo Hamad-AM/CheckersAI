@@ -1,7 +1,7 @@
 #include "CheckersGame.h"
 
 #include <iostream>
-
+#include <cmath>
 
 #include "Move.h"
 #include "Square.h"
@@ -38,24 +38,36 @@ void CheckersGame::initialize()
 		{
 			Square newSquare(i, j);
 
-			if ((i + j) % 2 != 0)
-			{
-				if (j < 3)
-				{
-					std::shared_ptr<Piece> newPiece = std::make_shared<Piece>(BLACK);
-					newSquare.occupent = newPiece;
-					blackPlayer->addPiece(newPiece);
-				}
-				else if (j > 4)
-				{
-					std::shared_ptr<Piece> newPiece = std::make_shared<Piece>(WHITE);
-					newSquare.occupent = newPiece;
-					whitePlayer->addPiece(newPiece);
-				}
-			}
+			//if ((i + j) % 2 != 0)
+			//{
+			//	if (j < 3)
+			//	{
+			//		std::shared_ptr<Piece> newPiece = std::make_shared<Piece>(BLACK);
+			//		newSquare.occupent = newPiece;
+			//		blackPlayer->addPiece(newPiece);
+			//	}
+			//	else if (j > 4)
+			//	{
+			//		std::shared_ptr<Piece> newPiece = std::make_shared<Piece>(WHITE);
+			//		newSquare.occupent = newPiece;
+			//		whitePlayer->addPiece(newPiece);
+			//	}
+			//}
 			board[i][j] = newSquare;
 		}
 	}
+
+	std::shared_ptr<Piece> newPiece1 = std::make_shared<Piece>(BLACK);
+	board[0][0].occupent = newPiece1;
+	blackPlayer->addPiece(newPiece1);
+
+	std::shared_ptr<Piece> newPiece2 = std::make_shared<Piece>(WHITE);
+	board[0][1].occupent = newPiece2;
+	whitePlayer->addPiece(newPiece2);
+
+	//std::shared_ptr<Piece> newPiece3 = std::make_shared<Piece>(WHITE);
+	//board[3][3].occupent = newPiece3;
+	//whitePlayer->addPiece(newPiece3);
 }
 
 
@@ -89,7 +101,6 @@ void CheckersGame::play()
 			executeMove(move);
 			turn = WHITE;
 		}
-
 		printboard();
 		checkIfGameOver(gameOver);
 	}
@@ -105,7 +116,6 @@ std::vector<Move> CheckersGame::getValidMoves()
 	for (int i = 0; i < currentPlayer.getNumOfPieces(); i++)
 	{
 		auto piece = currentPlayer.getPiece(i);
-		std::cout << i << std::endl;
 		if (piece != NULL)
 		{
 			getNormalMoves(piece, validmoves);
@@ -126,7 +136,8 @@ void CheckersGame::getJumpMoves(std::shared_ptr<Piece> const piece, std::vector<
 	std::vector<Square> squares;
 
 	std::vector<Square> possiblePoints;
-	getMultiJumpMoves(possiblePoints, pieceSquare, board, false);
+	Board boardCopy = board;
+	getMultiJumpMoves(possiblePoints, pieceSquare, boardCopy, false);
 	for (Square sqr : possiblePoints)
 	{
 		moves.emplace_back(Move(pieceSquare, sqr));
@@ -141,8 +152,11 @@ void CheckersGame::getMultiJumpMoves(std::vector<Square>& movesSoFar, Square sta
 		std::vector<Square> squares = getJumpSquaresDown(start, board);
 		if (squares.empty())
 		{
-			movesSoFar.emplace_back(start);
-			return;
+			if (!movesSoFar.empty())
+			{
+				movesSoFar.emplace_back(start);
+				return;
+			}
 		}
 		else
 		{
@@ -401,8 +415,27 @@ void CheckersGame::checkIfGameOver(bool& gameOver)
 
 void CheckersGame::executeMove(Move& const move)
 {
-	board[move.to.col][move.to.row].occupent = board[move.from.col][move.from.row].occupent;
-	board[move.from.col][move.to.col].occupent = nullptr;
+	Square& start = move.from;
+	Square& end = move.to;
+	// Check if move is jump
+	int diff = std::abs(end.col - start.col);
+	if (diff > 1)
+	{
+		// Check how many jumps there are
+		board[end.col][end.row].occupent = board[start.col][start.row].occupent;
+		board[start.col][start.row].occupent = nullptr;
+		// Delete pieces jumped over
+		for (int i = 1; i < std::abs(end.col - start.col); i = i + 2)
+		{
+			board[start.col + ((end.col - start.col) / diff) * i][start.row + ((end.row - start.row) / diff) * i].occupent = nullptr;
+		}
+	}
+	else
+	{
+		// if not complete normal move
+		board[move.to.col][move.to.row].occupent = board[move.from.col][move.from.row].occupent;
+		board[move.from.col][move.from.col].occupent = nullptr;
+	}
 }
 
 

@@ -24,7 +24,6 @@ Move ManualPlayer::chooseMove(std::vector<std::vector<Square>>& board, std::vect
 	}
 	std::cout << "Choose Move Index : ";
 	std::cin >> moveIndex;
-	
 
 	return validMoves[moveIndex];
 }

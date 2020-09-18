@@ -31,4 +31,14 @@ struct Square
 	{
 		std::cout << "[" << col << ", " << row << "]";
 	}
+
+	bool operator==(Square& rhs)
+	{
+		if (this->col == rhs.col && this->row == rhs.row)
+		{
+			return true;
+		}
+
+		return false;
+	}
 };
