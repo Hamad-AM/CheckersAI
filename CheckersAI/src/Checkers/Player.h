@@ -8,6 +8,8 @@
 #include "Color.h"
 #include "Move.h"
 
+class Board;
+
 class Player
 {
 public:
@@ -18,7 +20,7 @@ public:
 	bool isEmpty();
 	int getNumOfPieces();
 
-	virtual Move chooseMove(std::vector<std::vector<Square>>& board, std::vector<Move> validMoves) = 0;
+	virtual Move chooseMove(Board& board, std::vector<Move> validMoves) = 0;
 
 protected:
 	Color color;

@@ -4,13 +4,14 @@
 
 #include "Move.h"
 #include "Square.h"
+#include "Board.h"
 
 ManualPlayer::ManualPlayer(Color colorIn)
 	: Player(colorIn)
 {
 }
 
-Move ManualPlayer::chooseMove(std::vector<std::vector<Square>>& board, std::vector<Move> validMoves)
+Move ManualPlayer::chooseMove(Board& board, std::vector<Move> validMoves)
 {
 	int moveIndex;
 

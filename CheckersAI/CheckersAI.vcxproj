@@ -87,6 +87,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Checkers\Board.cpp" />
     <ClCompile Include="src\Checkers\AIPlayer.cpp" />
     <ClCompile Include="src\Checkers\ManualPlayer.cpp" />
     <ClCompile Include="src\Checkers\CheckersGame.cpp" />
@@ -97,6 +98,7 @@
     <ClCompile Include="src\MainWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Checkers\Board.h" />
     <ClInclude Include="src\Checkers\AIPlayer.h" />
     <ClInclude Include="src\Checkers\Color.h" />
     <ClInclude Include="src\Checkers\ManualPlayer.h" />

@@ -9,6 +9,7 @@
     <ClCompile Include="src\Checkers\Player.cpp" />
     <ClCompile Include="src\Checkers\AIPlayer.cpp" />
     <ClCompile Include="src\Checkers\ManualPlayer.cpp" />
+    <ClCompile Include="src\Checkers\Board.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AI.h" />
@@ -22,5 +23,6 @@
     <ClInclude Include="src\Checkers\AIPlayer.h" />
     <ClInclude Include="src\Checkers\ManualPlayer.h" />
     <ClInclude Include="src\Checkers\Color.h" />
+    <ClInclude Include="src\Checkers\Board.h" />
   </ItemGroup>
 </Project>
