@@ -23,13 +23,13 @@ CheckersGame::CheckersGame(Color manualPlayersColor)
 	whitePlayer = std::make_unique<ManualPlayer>(WHITE);
 	blackPlayer = std::make_unique<ManualPlayer>(BLACK);
 
-	turn = WHITE;
+	turn = BLACK;
 }
 
 
 void CheckersGame::initialize()
 {
-	turn = WHITE;
+	turn = BLACK;
 
 	board.initialize(*blackPlayer, *whitePlayer);
 
@@ -53,9 +53,13 @@ void CheckersGame::play()
 
 	bool gameOver = false;
 
+	int turns = 1;
+
 	while (!gameOver)
 	{
 		board.print();
+		std::cout << "\n";
+
 		std::vector<Move> validMoves = getValidMoves();
 
 		if (validMoves.empty())
@@ -67,18 +71,50 @@ void CheckersGame::play()
 
 		if (turn == WHITE)
 		{
+			//if (turns == 2)
+			//{
+			//	Move move = validMoves[5];
+			//	board.executeMove(move);
+			//}
+			//else
+			//{
+
+			//	Move move = whitePlayer->chooseMove(board, validMoves);
+			//	board.executeMove(move);
+			//}
+
 			Move move = whitePlayer->chooseMove(board, validMoves);
 			board.executeMove(move);
 			turn = BLACK;
 		}
 		else if (turn == BLACK)
 		{
+			//if (turns == 1)
+			//{
+			//	Move move = validMoves[3];
+
+			//	board.executeMove(move);
+			//}
+			//else if (turns == 3)
+			//{
+			//	Move move = validMoves[0];
+			//	board.executeMove(move);
+			//}
+			//else
+			//{
+			//	Move move = blackPlayer->chooseMove(board, validMoves);
+
+			//	board.executeMove(move);
+			//}
+
 			Move move = blackPlayer->chooseMove(board, validMoves);
 			board.executeMove(move);
+
 			turn = WHITE;
 		}
-		board.print();
 		checkIfGameOver(gameOver);
+
+		turns++;
 	}
 }
 
@@ -89,7 +125,8 @@ std::vector<Move> CheckersGame::getValidMoves()
 	std::vector<Move> validJumps;
 	Player& currentPlayer = (turn == WHITE) ? *whitePlayer : *blackPlayer;
 	
-	for (int i = 0; i < currentPlayer.getNumOfPieces(); i++)
+
+	for (int i = 0; i < 12; i++)
 	{
 		auto piece = currentPlayer.getPiece(i);
 		if (piece != NULL)

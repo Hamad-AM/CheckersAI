@@ -33,8 +33,9 @@ public:
 	Square getBottomLeft(Square& const relativeSquare);
 
 	static DataType completeMove(Square start, Square end, DataType& dataCopy);
-	static std::vector<Square> getJumpSquaresDown(Square& const square, DataType& dataCopy, Color& const color);
-	static std::vector<Square> getJumpSquaresUp(Square& const square, DataType& dataCopy, Color& const color);
+	static std::vector<Square> getJumpSquaresDown(Square square, DataType dataCopy, Color color);
+	static std::vector<Square> getJumpSquaresUp(Square square, DataType dataCopy, Color color);
+	static std::vector<Square> possible_jumps(Square start, DataType dataCopy, Color color, bool king);
 
 
 	void print();

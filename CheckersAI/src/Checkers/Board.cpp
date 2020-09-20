@@ -34,6 +34,18 @@ void Board::initialize(Player& blackPlayer, Player& whitePlayer)
 			data[i][j] = newSquare;
 		}
 	}
+
+	//std::shared_ptr<Piece> newPiece = std::make_shared<Piece>(WHITE);
+	//data[7][6].occupent = newPiece;
+	//whitePlayer.addPiece(newPiece);
+
+	//std::shared_ptr<Piece> newPiece2 = std::make_shared<Piece>(WHITE);
+	//data[5][6].occupent = newPiece2;
+	//whitePlayer.addPiece(newPiece2);
+
+	//std::shared_ptr<Piece> newPiece3 = std::make_shared<Piece>(BLACK);
+	//data[6][5].occupent = newPiece3;
+	//blackPlayer.addPiece(newPiece3);
 }
 
 void Board::executeMove(Move& const move)
@@ -43,7 +55,23 @@ void Board::executeMove(Move& const move)
 
 	movePiece(start, end);
 
-	// Check if move is jump
+	// Make piece king if end of board reached
+	if (data[end.col][end.row].occupent->color == WHITE)
+	{
+		if (end.row == 0)
+		{
+			data[end.col][end.row].occupent->king = true;
+		}
+	}
+	else
+	{
+		if (end.row == 7)
+		{
+			data[end.col][end.row].occupent->king = true;
+		}
+	}
+
+	// delete captured pieces if jump was performed
 	int diff = std::abs(end.col - start.col);
 	if (diff > 1)
 	{
@@ -70,18 +98,24 @@ std::vector<Square> Board::getDiagonalSquaresDown(Square& const relativeSquare)
 	std::vector<Square> squares;
 	squares.reserve(2);
 
+	//if (relativeSquare.col == 7 && relativeSquare.row == 6)
+	//{
+	//	std::cout << "Problem here" << std::endl;
+	//}
 
-	if (relativeSquare.col != 0)
+	// Get bottom left square if not in bottom left corner
+	if (relativeSquare.col > 0)
 	{
-		if (relativeSquare.row != 7)
+		if (relativeSquare.row < 7)
 		{
 			squares.emplace_back(getBottomLeft(relativeSquare));
 		}
 	}
 
-	if (relativeSquare.col != 7)
+	// Get bottom right square if not in bottom right corner
+	if (relativeSquare.col < 7)
 	{
-		if (relativeSquare.row != 7)
+		if (relativeSquare.row < 7)
 		{
 			squares.emplace_back(getBottomRight(relativeSquare));
 		}
@@ -95,17 +129,18 @@ std::vector<Square> Board::getDiagonalSquaresUp(Square& const relativeSquare)
 	std::vector<Square> squares;
 	squares.reserve(2);
 
-	if (relativeSquare.col != 0)
+	// Get top left square if not in the top left corner
+	if (relativeSquare.col > 0)
 	{
-		if (relativeSquare.row != 0)
+		if (relativeSquare.row > 0)
 		{
 			squares.emplace_back(getTopLeft(relativeSquare));
 		}
 	}
 
-	if (relativeSquare.col != 7)
+	if (relativeSquare.col < 7)
 	{
-		if (relativeSquare.row != 0)
+		if (relativeSquare.row > 0)
 		{
 			squares.emplace_back(getTopRight(relativeSquare));
 		}
@@ -116,7 +151,14 @@ std::vector<Square> Board::getDiagonalSquaresUp(Square& const relativeSquare)
 
 void Board::getNormalMoves(std::shared_ptr<Piece> const piece, std::vector<Move>& moves)
 {
+
 	Square pieceSquare = getSquareOfPiece(piece);
+
+	//if ((pieceSquare.col == 7) && (pieceSquare.row == 6))
+	//{
+	//	std::cout << "should jump" << std::endl;
+	//}
+
 	std::vector<Square> squares;
 	if (piece->color == BLACK || piece->king == true)
 	{
@@ -142,18 +184,72 @@ void Board::getNormalMoves(std::shared_ptr<Piece> const piece, std::vector<Move>
 	}
 }
 
+struct multi_jumps
+{
+	std::vector<Square> jumps;
+	multi_jumps(Square start, DataType dataCopy, Color color, bool king)
+	{
+		jumps.reserve(10);
+		explore({}, start, dataCopy, color, king);
+	}
+
+	void explore(std::vector<Square> so_far, Square start, DataType dataCopy, Color color, bool king)
+	{
+		auto moves = Board::possible_jumps(start, dataCopy, color, king);
+
+		if (moves.empty()) {
+			if (!so_far.empty()) {
+				for (Square square : so_far)
+				{
+					jumps.push_back(square);
+				}
+			}
+		}
+		else {
+			for (const auto move : moves) {
+				DataType new_board = Board::completeMove(start, move, dataCopy);
+				std::vector<Square> new_so_far = so_far;
+				new_so_far.push_back(move);
+				explore(new_so_far, move, new_board, color, king);
+			}
+		}
+	}
+};
+
 void Board::getJumpMoves(std::shared_ptr<Piece> const piece, std::vector<Move>& moves)
 {
 	Square pieceSquare = getSquareOfPiece(piece);
 	std::vector<Square> squares;
 
+	//if ((pieceSquare.col == 7) && (pieceSquare.row == 6))
+	//{
+	//	std::cout << "should jump" << std::endl;
+	//}
+
 	std::vector<Square> possiblePoints;
 	DataType boardCopy = data;
-	getMultiJumpMoves(*piece, possiblePoints, pieceSquare, boardCopy);
+	//getMultiJumpMoves(*piece, possiblePoints, pieceSquare, boardCopy);
+	possiblePoints = multi_jumps(pieceSquare, boardCopy, piece->color, piece->king).jumps;
 	for (Square sqr : possiblePoints)
 	{
 		moves.emplace_back(Move(pieceSquare, sqr));
 	}
+}
+
+std::vector<Square> Board::possible_jumps(Square start, DataType dataCopy, Color color, bool king)
+{
+	std::vector<Square> squares;
+	if (color == BLACK || king == true)
+	{
+		squares = getJumpSquaresDown(start, dataCopy, color);
+	}
+	if (color == WHITE || king == true)
+	{
+		squares = getJumpSquaresUp(start, dataCopy, color);
+
+	}
+
+	return squares;
 }
 
 void Board::getMultiJumpMoves(Piece& const piece, std::vector<Square>& movesSoFar, Square start, DataType& dataCopy)
@@ -174,6 +270,11 @@ void Board::getMultiJumpMoves(Piece& const piece, std::vector<Square>& movesSoFa
 
 void Board::getFurtherJumps(Piece& const piece, std::vector<Square>& squares, std::vector<Square>& movesSoFar, Square start, DataType& dataCopy)
 {
+	//if (start.col == 4 && start.row == 3)
+	//{
+	//	std::cout << "Debug point" << std::endl;
+	//}
+
 	if (squares.empty())
 	{
 		if (!movesSoFar.empty())
@@ -187,7 +288,9 @@ void Board::getFurtherJumps(Piece& const piece, std::vector<Square>& squares, st
 		for (Square newSquare : squares)
 		{
 			DataType newBoard = completeMove(start, newSquare, dataCopy);
-			getMultiJumpMoves(piece, movesSoFar, newSquare, newBoard);
+			std::vector<Square> newMovesSoFar = movesSoFar;
+			newMovesSoFar.push_back(newSquare);
+			getMultiJumpMoves(piece, newMovesSoFar, newSquare, newBoard);
 		}
 	}
 }
@@ -198,10 +301,6 @@ Square Board::getSquareOfPiece(std::shared_ptr<Piece> const piece)
 	{
 		for (int j = 0; j < 8; j++)
 		{
-			if (i == 0 && j == 7)
-			{
-				std::cout << i << ", " << j << std::endl;
-			}
 			if (data[i][j].occupent != nullptr)
 			{
 				if (data[i][j].occupent == piece)
@@ -235,17 +334,22 @@ Square Board::getBottomLeft(Square& const relativeSquare)
 
 DataType Board::completeMove(Square start, Square end, DataType& dataCopy)
 {
+	//if ((end.col == 7) && (end.row = 4))
+	//{
+	//	std::cout << start.col + (end.col - start.col) / 2 << ", " << start.row + (end.row - start.row) / 2 << std::endl;
+	//}
+
 	dataCopy[end.col][end.row].occupent = dataCopy[start.col][start.row].occupent;
-	dataCopy[(end.col - start.col) / 2][(end.row - start.row) / 2].occupent = nullptr;
+	dataCopy[start.col + (end.col - start.col) / 2][start.row + (end.row - start.row) / 2].occupent = nullptr;
 	dataCopy[start.col][start.row].occupent = nullptr;
 	return dataCopy;
 }
 
-std::vector<Square> Board::getJumpSquaresDown(Square& const square, DataType& dataCopy, Color& const color)
+std::vector<Square> Board::getJumpSquaresDown(Square square, DataType dataCopy, Color color)
 {
 	std::vector<Square> returnSqr;
 	returnSqr.reserve(4);
-
+	
 	if (square.col >= 2)
 	{
 		if (square.row <= 5)
@@ -256,6 +360,7 @@ std::vector<Square> Board::getJumpSquaresDown(Square& const square, DataType& da
 			{
 				if (dataCopy[square.col - 2][square.row + 2].occupent == nullptr)
 				{
+					/*std::cout << square.col - 2 << ", " << square.row + 2 << std::endl;*/
 					returnSqr.emplace_back(dataCopy[square.col - 2][square.row + 2]);
 				}
 			}
@@ -272,6 +377,8 @@ std::vector<Square> Board::getJumpSquaresDown(Square& const square, DataType& da
 			{
 				if (dataCopy[square.col + 2][square.row + 2].occupent == nullptr)
 				{
+
+					/*std::cout << square.col + 2 << ", " << square.row + 2 << std::endl;*/
 					returnSqr.emplace_back(dataCopy[square.col + 2][square.row + 2]);
 				}
 			}
@@ -281,10 +388,15 @@ std::vector<Square> Board::getJumpSquaresDown(Square& const square, DataType& da
 	return returnSqr;
 }
 
-std::vector<Square> Board::getJumpSquaresUp(Square& const square, DataType& dataCopy, Color& const color)
+std::vector<Square> Board::getJumpSquaresUp(Square square, DataType dataCopy, Color color)
 {
 	std::vector<Square> returnSqr;
 	returnSqr.reserve(4);
+
+	//if (square.col == 7 && square.row == 6)
+	//{
+	//	std::cout << "should jump" << std::endl;
+	//}
 
 	if (square.col >= 2)
 	{
@@ -296,7 +408,9 @@ std::vector<Square> Board::getJumpSquaresUp(Square& const square, DataType& data
 			{
 				if (dataCopy[square.col - 2][square.row - 2].occupent == nullptr)
 				{
-					returnSqr.emplace_back(dataCopy[square.col + 2][square.row + 2]);
+
+					/*std::cout << square.col - 2 << ", " << square.row - 2 << std::endl;*/
+					returnSqr.push_back(dataCopy[square.col - 2][square.row - 2]);
 				}
 			}
 		}
@@ -308,11 +422,17 @@ std::vector<Square> Board::getJumpSquaresUp(Square& const square, DataType& data
 		{
 			// Check the top right squares
 			if (dataCopy[square.col + 1][square.row - 1].occupent != nullptr
-				&& dataCopy[square.col + 1][square.row + 1].occupent->color != color)
+				&& dataCopy[square.col + 1][square.row - 1].occupent->color != color)
 			{
 				if (dataCopy[square.col + 2][square.row - 2].occupent == nullptr)
 				{
-					returnSqr.emplace_back(dataCopy[square.col + 2][square.row + 2]);
+
+					/*std::cout << square.col + 2 << ", " << square.row - 2 << std::endl;
+					if (((square.col + 2) == 7) && ((square.row - 2) == 4))
+					{
+						dataCopy[7][4].write();
+					}*/
+					returnSqr.push_back(dataCopy[square.col + 2][square.row - 2]);
 				}
 			}
 		}
