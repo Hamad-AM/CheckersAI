@@ -11,4 +11,5 @@ struct Piece
 
 	Piece(Color colorIn) 
 		: color(colorIn) {}
+
 };

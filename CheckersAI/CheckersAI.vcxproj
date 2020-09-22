@@ -92,12 +92,11 @@
     <ClCompile Include="src\Checkers\ManualPlayer.cpp" />
     <ClCompile Include="src\Checkers\CheckersGame.cpp" />
     <ClCompile Include="src\Checkers\Player.cpp" />
-    <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\GameWindow.cpp" />
-    <ClCompile Include="src\AI.cpp" />
     <ClCompile Include="src\MainWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Checkers\GameState.h" />
     <ClInclude Include="src\Checkers\Board.h" />
     <ClInclude Include="src\Checkers\AIPlayer.h" />
     <ClInclude Include="src\Checkers\Color.h" />
@@ -106,10 +105,9 @@
     <ClInclude Include="src\Checkers\Player.h" />
     <ClInclude Include="src\Checkers\Move.h" />
     <ClInclude Include="src\Checkers\Piece.h" />
+    <ClInclude Include="src\Checkers\Position.h" />
     <ClInclude Include="src\Checkers\Square.h" />
-    <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\GameWindow.h" />
-    <ClInclude Include="src\AI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

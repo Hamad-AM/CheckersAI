@@ -1,14 +1,14 @@
 #pragma once
-#include "Square.h"
-
 #include <iostream>
+
+#include "Square.h"
 
 struct Move
 {
-	Square from;
-	Square to;
+	Position from;
+	Position to;
 
-	Move(Square start, Square end)
+	Move(Position start, Position end)
 		: from(start), to(end)
 	{
 	}

@@ -11,7 +11,7 @@ ManualPlayer::ManualPlayer(Color colorIn)
 {
 }
 
-Move ManualPlayer::chooseMove(Board& board, std::vector<Move> validMoves)
+Move ManualPlayer::chooseMove(Board board, std::vector<Move> validMoves)
 {
 	int moveIndex;
 

@@ -5,23 +5,24 @@
 
 #include "Move.h"
 #include "Square.h"
+#include "Position.h"
 
 
 CheckersGame::CheckersGame(Color manualPlayersColor)
 {
-	//if (manualPlayersColor == WHITE)
-	//{
-	//	whitePlayer = std::make_unique<ManualPlayer>(WHITE);
-	//	blackPlayer = std::make_unique<AIPlayer>(BLACK);
-	//}
-	//else
-	//{
-	//	whitePlayer = std::make_unique<AIPlayer>(WHITE);
-	//	blackPlayer = std::make_unique<ManualPlayer>(BLACK);
-	//}
+	if (manualPlayersColor == WHITE)
+	{
+		whitePlayer = std::make_unique<ManualPlayer>(WHITE);
+		blackPlayer = std::make_unique<AIPlayer>(BLACK);
+	}
+	else
+	{
+		whitePlayer = std::make_unique<AIPlayer>(WHITE);
+		blackPlayer = std::make_unique<ManualPlayer>(BLACK);
+	}
 
-	whitePlayer = std::make_unique<ManualPlayer>(WHITE);
-	blackPlayer = std::make_unique<ManualPlayer>(BLACK);
+	//whitePlayer = std::make_unique<ManualPlayer>(WHITE);
+	//blackPlayer = std::make_unique<ManualPlayer>(BLACK);
 
 	turn = BLACK;
 }

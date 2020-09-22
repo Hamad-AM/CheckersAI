@@ -20,7 +20,7 @@ public:
 	bool isEmpty();
 	int getNumOfPieces();
 
-	virtual Move chooseMove(Board& board, std::vector<Move> validMoves) = 0;
+	virtual Move chooseMove(Board board, std::vector<Move> validMoves) = 0;
 
 protected:
 	Color color;
